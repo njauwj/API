@@ -60,6 +60,10 @@ public class User implements Serializable {
      */
     private Date updateTime;
 
+    private String accessKey;
+
+    private String secretKey;
+
     /**
      * 是否删除
      */

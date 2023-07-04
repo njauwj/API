@@ -7,6 +7,7 @@ import com.yupi.project.exception.BusinessException;
 import com.yupi.project.mapper.UserMapper;
 import com.yupi.project.model.entity.User;
 import com.yupi.project.service.UserService;
+import com.yupi.project.utils.KeyGeneratorUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -67,6 +68,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             User user = new User();
             user.setUserAccount(userAccount);
             user.setUserPassword(encryptPassword);
+            user.setAccessKey(KeyGeneratorUtil.genAccessKey());
+            user.setSecretKey(KeyGeneratorUtil.genSecretKey());
             boolean saveResult = this.save(user);
             if (!saveResult) {
                 throw new BusinessException(ErrorCode.SYSTEM_ERROR, "注册失败，数据库错误");

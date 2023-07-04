@@ -10,6 +10,7 @@ import com.yupi.project.common.ResultUtils;
 import com.yupi.project.constant.CommonConstant;
 import com.yupi.project.exception.BusinessException;
 import com.yupi.project.model.dto.interfaceinfo.InterfaceInfoAddRequest;
+import com.yupi.project.model.dto.interfaceinfo.InterfaceInfoOnlineRequest;
 import com.yupi.project.model.dto.interfaceinfo.InterfaceInfoQueryRequest;
 import com.yupi.project.model.dto.interfaceinfo.InterfaceInfoUpdateRequest;
 import com.yupi.project.model.entity.InterfaceInfo;
@@ -18,12 +19,16 @@ import com.yupi.project.service.InterfaceInfoService;
 import com.yupi.project.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.juli.OneLineFormatter;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+
+import static com.yupi.project.constant.InterfaceInfoStatus.OFFLINE;
+import static com.yupi.project.constant.InterfaceInfoStatus.ONLINE;
 
 /**
  * 帖子接口
@@ -41,7 +46,50 @@ public class InterfaceInfoController {
     @Resource
     private UserService userService;
 
-    // region 增删改查
+
+    /**
+     * 发布接口
+     *
+     * @param id
+     * @return
+     */
+    @PostMapping("/online")
+    @AuthCheck(mustRole = "admin")
+    public BaseResponse<Boolean> onlineInterfaceInfo(@RequestBody InterfaceInfoOnlineRequest interfaceInfoOnlineRequest) {
+        InterfaceInfo interfaceInfo = interfaceInfoService.getById(interfaceInfoOnlineRequest.getId());
+        if (interfaceInfo == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "接口不存在");
+        }
+        if (interfaceInfo.getStatus().equals(ONLINE)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "接口已上线");
+        }
+        interfaceInfo.setStatus(ONLINE);
+        //todo 判断接口是否能调用
+        interfaceInfoService.updateById(interfaceInfo);
+        return ResultUtils.success(true);
+    }
+
+    /**
+     * 下线接口
+     *
+     * @param
+     * @return
+     */
+    @PostMapping("/offline")
+    @AuthCheck(mustRole = "admin")
+    public BaseResponse<Boolean> offlineInterfaceInfo(@RequestBody InterfaceInfoOnlineRequest interfaceInfoOnlineRequest) {
+        InterfaceInfo interfaceInfo = interfaceInfoService.getById(interfaceInfoOnlineRequest.getId());
+        if (interfaceInfo == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "接口不存在");
+        }
+        if (interfaceInfo.getStatus().equals(OFFLINE)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "接口已下线");
+        }
+        interfaceInfo.setStatus(OFFLINE);
+        interfaceInfoService.updateById(interfaceInfo);
+        return ResultUtils.success(true);
+    }
+
 
     /**
      * 创建
@@ -105,7 +153,7 @@ public class InterfaceInfoController {
      */
     @PostMapping("/update")
     public BaseResponse<Boolean> updateInterfaceInfo(@RequestBody InterfaceInfoUpdateRequest interfaceInfoUpdateRequest,
-                                            HttpServletRequest request) {
+                                                     HttpServletRequest request) {
         if (interfaceInfoUpdateRequest == null || interfaceInfoUpdateRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
