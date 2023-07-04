@@ -1,0 +1,55 @@
+package com.atwj.client;
+
+import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpUtil;
+import cn.hutool.json.JSONUtil;
+import com.atwj.model.User;
+import com.atwj.utils.SignUtil;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.HashMap;
+
+/**
+ * @author wj
+ * @create_time 2023/7/3
+ * @description
+ */
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+public class WjApiClient {
+
+
+    private String accessKey;
+    private String secretKey;
+
+    public String getNameByGet(String name) {
+        //可以单独传入http参数，这样参数会自动做URL编码，拼接在URL中
+        HashMap<String, Object> paramMap = new HashMap<>();
+        paramMap.put("name", name);
+        String result = HttpUtil.get("http://localhost:8123/api/name/get/", paramMap);
+        return result;
+    }
+
+    public String getNameByPost(@RequestParam String name) {
+        HashMap<String, Object> paramMap = new HashMap<>();
+        paramMap.put("name", name);
+        String result = HttpUtil.post("http://localhost:8123/api/name/post/", paramMap);
+        return result;
+    }
+
+    public String getUsernameByPost(@RequestBody User user) {
+        String json = JSONUtil.toJsonStr(user);
+        String signature = SignUtil.generateSignature(json + secretKey);
+        HashMap<String, String> headerMap = new HashMap<>();
+        headerMap.put("accessKey", accessKey);
+        headerMap.put("sign", signature);
+        String result = HttpRequest.post("http://localhost:8123/api/name/user/").addHeaders(headerMap).body(json).execute().body();
+        return result;
+    }
+
+}
