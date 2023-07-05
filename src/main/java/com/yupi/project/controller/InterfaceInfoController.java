@@ -1,5 +1,7 @@
 package com.yupi.project.controller;
 
+import cn.hutool.json.JSONUtil;
+import com.atwj.client.WjApiClient;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yupi.project.annotation.AuthCheck;
@@ -9,17 +11,13 @@ import com.yupi.project.common.ErrorCode;
 import com.yupi.project.common.ResultUtils;
 import com.yupi.project.constant.CommonConstant;
 import com.yupi.project.exception.BusinessException;
-import com.yupi.project.model.dto.interfaceinfo.InterfaceInfoAddRequest;
-import com.yupi.project.model.dto.interfaceinfo.InterfaceInfoOnlineRequest;
-import com.yupi.project.model.dto.interfaceinfo.InterfaceInfoQueryRequest;
-import com.yupi.project.model.dto.interfaceinfo.InterfaceInfoUpdateRequest;
+import com.yupi.project.model.dto.interfaceinfo.*;
 import com.yupi.project.model.entity.InterfaceInfo;
 import com.yupi.project.model.entity.User;
 import com.yupi.project.service.InterfaceInfoService;
 import com.yupi.project.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.juli.OneLineFormatter;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,7 +48,7 @@ public class InterfaceInfoController {
     /**
      * 发布接口
      *
-     * @param id
+     * @param
      * @return
      */
     @PostMapping("/online")
@@ -88,6 +86,27 @@ public class InterfaceInfoController {
         interfaceInfo.setStatus(OFFLINE);
         interfaceInfoService.updateById(interfaceInfo);
         return ResultUtils.success(true);
+    }
+
+
+    @PostMapping("/invoke")
+    public BaseResponse<Object> invokeInterface(@RequestBody InvokeInterfaceRequest invokeInterfaceRequest, HttpServletRequest request) {
+        Long id = invokeInterfaceRequest.getId();
+        String userRequestParams = invokeInterfaceRequest.getUserRequestParams();
+        InterfaceInfo interfaceInfo = interfaceInfoService.getById(id);
+        if (interfaceInfo == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "接口不存在");
+        }
+        if (interfaceInfo.getStatus().equals(OFFLINE)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "接口已下线");
+        }
+        User loginUser = userService.getLoginUser(request);
+        String accessKey = loginUser.getAccessKey();
+        String secretKey = loginUser.getSecretKey();
+        WjApiClient wjApiClient = new WjApiClient(accessKey, secretKey);
+        com.atwj.model.User userBean = JSONUtil.toBean(userRequestParams, com.atwj.model.User.class);
+        String nameByPost = wjApiClient.getUsernameByPost(userBean);
+        return ResultUtils.success(nameByPost);
     }
 
 

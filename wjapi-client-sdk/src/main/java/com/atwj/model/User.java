@@ -57,9 +57,14 @@ public class User implements Serializable {
      */
     private Date updateTime;
 
+    private String accessKey;
+
+    private String secretKey;
+
     /**
      * 是否删除
      */
     private Integer isDelete;
+
     private static final long serialVersionUID = 1L;
 }

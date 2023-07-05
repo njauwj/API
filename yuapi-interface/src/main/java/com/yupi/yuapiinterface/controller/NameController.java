@@ -1,10 +1,14 @@
 package com.yupi.yuapiinterface.controller;
 
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yupi.yuapiinterface.model.User;
+import com.yupi.yuapiinterface.service.UserService;
 import com.yupi.yuapiinterface.utils.SignUtil;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -14,6 +18,9 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping("/name")
 public class NameController {
 
+    @Resource
+    private UserService userService;
+
 
     @GetMapping("/get")
     public String getNameByGet(String name) {
@@ -21,7 +28,22 @@ public class NameController {
     }
 
     @PostMapping("/post")
-    public String getNameByPost(@RequestParam String name) {
+    public String getNameByPost(@RequestParam String name, HttpServletRequest request) {
+        String sign = request.getHeader("sign");
+        String accessKey = request.getHeader("accessKey");
+        //根据accessKey查询数据库得到
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(StringUtils.hasText(accessKey), User::getAccessKey, accessKey);
+        User requestUser = userService.getOne(queryWrapper);
+        if (requestUser == null) {
+            throw new RuntimeException("非法请求");
+        }
+        String secretKey = requestUser.getSecretKey();
+        String data = name + secretKey;
+        boolean verify = SignUtil.verify(data, sign);
+        if (!verify) {
+            throw new RuntimeException("no authority");
+        }
         return "POST 你的名字是" + name;
     }
 
@@ -30,7 +52,13 @@ public class NameController {
         String sign = request.getHeader("sign");
         String accessKey = request.getHeader("accessKey");
         //根据accessKey查询数据库得到
-        String secretKey = "wj";
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(StringUtils.hasText(accessKey), User::getAccessKey, accessKey);
+        User requestUser = userService.getOne(queryWrapper);
+        if (requestUser == null) {
+            throw new RuntimeException("非法请求");
+        }
+        String secretKey = requestUser.getSecretKey();
         String data = JSONUtil.toJsonStr(user) + secretKey;
         boolean verify = SignUtil.verify(data, sign);
         if (!verify) {

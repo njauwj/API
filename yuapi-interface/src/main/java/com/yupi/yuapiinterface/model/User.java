@@ -1,5 +1,6 @@
 package com.yupi.yuapiinterface.model;
 
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -10,11 +11,13 @@ import java.util.Date;
  *
  * @TableName user
  */
+@TableName(value = "user")
 @Data
 public class User implements Serializable {
     /**
      * id
      */
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     /**
@@ -57,9 +60,16 @@ public class User implements Serializable {
      */
     private Date updateTime;
 
+    private String accessKey;
+
+    private String secretKey;
+
     /**
      * 是否删除
      */
+    @TableLogic
     private Integer isDelete;
+
+    @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 }

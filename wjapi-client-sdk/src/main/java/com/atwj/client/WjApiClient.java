@@ -8,8 +8,6 @@ import com.atwj.utils.SignUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.HashMap;
 
@@ -35,14 +33,16 @@ public class WjApiClient {
         return result;
     }
 
-    public String getNameByPost(@RequestParam String name) {
-        HashMap<String, Object> paramMap = new HashMap<>();
-        paramMap.put("name", name);
-        String result = HttpUtil.post("http://localhost:8123/api/name/post/", paramMap);
+    public String getNameByPost(String name) {
+        String signature = SignUtil.generateSignature(name + secretKey);
+        HashMap<String, String> headerMap = new HashMap<>();
+        headerMap.put("accessKey", accessKey);
+        headerMap.put("sign", signature);
+        String result = HttpUtil.post("http://localhost:8123/api/name/post/", name);
         return result;
     }
 
-    public String getUsernameByPost(@RequestBody User user) {
+    public String getUsernameByPost(User user) {
         String json = JSONUtil.toJsonStr(user);
         String signature = SignUtil.generateSignature(json + secretKey);
         HashMap<String, String> headerMap = new HashMap<>();
