@@ -7,7 +7,7 @@ import com.yupi.yuapiinterface.model.User;
 /**
  * 用户服务
  *
- * @author yupi
+ * @author wj
  */
 public interface UserService extends IService<User> {
 

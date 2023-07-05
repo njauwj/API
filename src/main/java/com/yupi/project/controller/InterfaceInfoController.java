@@ -31,7 +31,7 @@ import static com.yupi.project.constant.InterfaceInfoStatus.ONLINE;
 /**
  * 帖子接口
  *
- * @author yupi
+ * @author wj
  */
 @RestController
 @RequestMapping("/interfaceInfo")

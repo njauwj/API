@@ -3,7 +3,7 @@ package com.yupi.project.common;
 /**
  * 返回工具类
  *
- * @author yupi
+ * @author wj
  */
 public class ResultUtils {
 

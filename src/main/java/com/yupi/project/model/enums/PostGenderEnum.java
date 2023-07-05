@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 /**
  * 帖子性别枚举
  *
- * @author yupi
+ * @author wj
  */
 public enum PostGenderEnum {
 

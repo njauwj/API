@@ -23,7 +23,7 @@ import static com.yupi.project.constant.UserConstant.USER_LOGIN_STATE;
 /**
  * 用户服务实现类
  *
- * @author yupi
+ * @author wj
  */
 @Service
 @Slf4j
