@@ -25,11 +25,13 @@ public class WjApiClient {
     private String accessKey;
     private String secretKey;
 
+    public static final String URI = "http://localhost:8090";
+
     public String getNameByGet(String name) {
         //可以单独传入http参数，这样参数会自动做URL编码，拼接在URL中
         HashMap<String, Object> paramMap = new HashMap<>();
         paramMap.put("name", name);
-        String result = HttpUtil.get("http://localhost:8123/api/name/get/", paramMap);
+        String result = HttpUtil.get(URI + "/api/name/get/", paramMap);
         return result;
     }
 
@@ -38,7 +40,7 @@ public class WjApiClient {
         HashMap<String, String> headerMap = new HashMap<>();
         headerMap.put("accessKey", accessKey);
         headerMap.put("sign", signature);
-        String result = HttpUtil.post("http://localhost:8123/api/name/post/", name);
+        String result = HttpUtil.post(URI + "/api/name/post/", name);
         return result;
     }
 
@@ -48,7 +50,8 @@ public class WjApiClient {
         HashMap<String, String> headerMap = new HashMap<>();
         headerMap.put("accessKey", accessKey);
         headerMap.put("sign", signature);
-        String result = HttpRequest.post("http://localhost:8123/api/name/user/").addHeaders(headerMap).body(json).execute().body();
+        headerMap.put("body", json);
+        String result = HttpRequest.post(URI + "/api/name/user/").addHeaders(headerMap).body(json).execute().body();
         return result;
     }
 
